@@ -12,4 +12,4 @@ To use auth server, follow these steps:
 ## Acknowledgments 
 Working with Michael, Spencer, and Kevin in Remo
 ## UML
-<-- UML image goes here -->
+![uml for caps](./uml.jpeg)
