@@ -1,29 +1,60 @@
-'use strict';
+const emitter = require('../events');
+require('../vendor/vendor.js');
 
-const obj = require('../caps.js');
+jest.useFakeTimers();
 
-// helper
-function timeStamp() {
-  let today = new Date();
-  let dd = String(today.getDate()).padStart(2, '0');
-  let mm = String(today.getMonth() + 1).padStart(2, '0');
-  let yyyy = today.getFullYear();
-  let hour = String(today.getHours()).padStart(2, '0');
-  var time = hour + ":" + String(today.getMinutes()).padStart(2, '0');
-  today = `${yyyy}-${mm}-${dd}T${time}:00`;
-  return today;
-}
+beforeEach(jest.clearAllTimers);
 
-let sampleOrder = { orderID : 1 };
+const delivery = {
+  store: '1-206-flowers',
+  orderID: '1234',
+  customer: 'tester testerooni',
+  address: '123 Nowhere Lane'
+};
 
-describe('tests functionality of event handler functions', () => {
-  test('driver pickup handler should console log - VENDOR: Pick-Up ready at time:', () => {
-    expect(obj.driverPickupHandler(timeStamp, sampleOrder)).toStrictEqual(`VENDOR: Pick-Up ready at time:${timeStamp()}${sampleOrder}`);
+describe('Testing the Vendor: ', () => {
+
+  it('Should respond to the delivered event at right time', () => {
+
+    console.log = jest.fn();
+
+    const inTransitHandler = jest.fn();
+
+    emitter.on('delivered', );
+
+    emitter.emit('pickup', delivery);
+
+    expect(inTransitHandler).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(1000);
+
+    expect(inTransitHandler).toHaveBeenCalledTimes(1);
+
+    expect(console.log).toHaveBeenCalledWith(`DRIVER: picked up ${delivery.orderID}`);
+
   });
-  test('in transit handler to console log - ', () => {
-    expect(obj.handleInTransit(timeStamp, sampleOrder)).toStrictEqual(`DRIVER: Your package ${sampleOrder.orderID} is in transit at ${timeStamp()}`);
+
+
+  it('Should emit delivered event at right time', () => {
+
+    console.log = jest.fn();
+
+    const deliveredHandler = jest.fn();
+
+    emitter.on('delivered', deliveredHandler);
+
+    emitter.emit('pickup', delivery);
+
+    expect(deliveredHandler).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(5000);
+
+    expect(deliveredHandler).toHaveBeenCalledTimes(1);
+
+    // WARNING: notice the "Last" in method name
+    expect(console.log).toHaveBeenLastCalledWith(`DRIVER: delivered up ${delivery.orderID}`);
+
   });
-  test('handleDelivered should console log - VENDOR: Thank you for ${sampleOrder.orderID}', () => {
-    expect(obj.handleInTransit(timeStamp, sampleOrder)).toStrictEqual(`VENDOR: Thank you for ${sampleOrder.orderID}`);
-  });
+
+
 });
