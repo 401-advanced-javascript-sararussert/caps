@@ -1,41 +1,33 @@
 'use strict';
 
-const net = require('net');
+const ioClient = require('socket.io-client');
 
-const client = new net.Socket();
-
-const host = process.env.HOST || 'localhost';
-const port = process.env.PORT || 3000;
-client.connect(port, host, () => { console.log('driver server is up', port)})
+const client = ioClient('ws://localhost:3000');
 const EE = require('events');
 const eventMgr = new EE();
 
-eventMgr.on('pickup', handlePickup)
 
-let coolEvents = ['pickup', 'Thank you for delivering']
+client.on('connect', () => {
+  console.log('vendor connected');
 
-client.on('data', function (data) {
-  let event = JSON.parse(data);
-  if (coolEvents.includes(event.event)) {
-    console.log(event.event, event.payload.orderID);
-  }
-  if (event.event === 'pickup') {
-    eventMgr.emit('pickup', event.payload);
-  }
+  client.on('message', function (data) {
+    console.log(data.event, data.payload.orderID);
+    if (data.event === 'pickup') {
+      handlePickup(data);
+    }  
+  });
 });
 
-client.on('close', function () {
-  console.log('Connection closed');
-});
+
 
 function handlePickup(payload) {
-  let event = JSON.stringify({ event: 'in-transit', payload: payload });
+  let data = { event: 'in-transit', payload: payload.payload };
   setTimeout(() => {
-    client.write(event)
+    client.emit('message', data)
   }, 1000);
-  let event2 = JSON.stringify({ event: 'delivered', payload: payload });
+  let data2 = { event: 'delivered', payload: payload.payload };
   setTimeout(() => {
-    client.write(event2)
+    client.emit('message', data2)
   }, 3000);
 
 }
