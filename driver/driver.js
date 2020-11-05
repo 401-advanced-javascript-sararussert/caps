@@ -19,7 +19,6 @@ client.on('connect', () => {
 });
 
 
-
 function handlePickup(payload) {
   let data = { event: 'in-transit', payload: payload.payload };
   setTimeout(() => {
