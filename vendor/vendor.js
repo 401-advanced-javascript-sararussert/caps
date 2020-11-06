@@ -3,10 +3,7 @@
 const ioClient = require('socket.io-client');
 
 const client = ioClient('ws://localhost:3000');
-const EE = require('events');
-const eventMgr = new EE();
 
-//eventMgr.on('delivered', handleDelivery)
 let order = {
   store: '1-206-flowers',
   orderID: '0001',
@@ -38,8 +35,8 @@ function sendPickupMessage(eventType, orderInfo) {
 }
 
 
-function handleDelivery(payload) {
-  let event = { event: 'Thank you for delivering', payload: payload.payload };
+function handleDelivery(data) {
+  let event = { event: 'Thank you for delivering', payload: data.payload, qID: data.qID };
   setTimeout(() => {
     client.emit('message', event);
   }, 1000);
